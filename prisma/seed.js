@@ -44,7 +44,7 @@ function main() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    demoUserId = "a43a081a-5502-4878-a491-de2604045f10";
+                    demoUserId = "e4ade040-1b0c-46f6-9d88-cdb1b036986d";
                     return [4 /*yield*/, prisma.product.createMany({
                             data: Array.from({ length: 25 }).map(function (_, i) { return ({
                                 userId: demoUserId,
