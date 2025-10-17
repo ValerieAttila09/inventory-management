@@ -1,3 +1,4 @@
+import ProductsChart from "@/components/productsChart";
 import Sidebar from "@/components/sidebar";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -21,7 +22,31 @@ export default async function DashboardPage() {
       where: { userId },
       select: { price: true, quantity: true, createdAt: true }
     })
-  ])
+  ]);
+
+  const weeklyProductsData = []
+  const now = new Date();
+
+  for (let i = 11; i >= 0; i--) {
+    const weekStart = new Date(now);
+    weekStart.setDate(weekStart.getDate() - i * 7);
+    weekStart.setHours(0,0,0,0);
+    
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    weekStart.setHours(23,59,59,999);
+
+    const weekLabel = `${String(weekStart.getMonth() + 1).padStart(2, "0")}/${String(weekStart.getDate() + 1).padStart(2, "0")}`;
+    const weekProducts = allProducts.filter((product) => {
+      const productDate = new Date(product.createdAt);
+      return productDate >= weekStart && productDate <= weekEnd;
+    });
+
+    weeklyProductsData.push({
+      week: weekLabel,
+      products: weekProducts.length
+    })
+  }
 
   const recent = await prisma.product.findMany({
     where: { userId },
@@ -77,7 +102,14 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          
+          <div className="bg-white rounded-md border border-[#ebebeb] p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="">New products per week</h2>
+            </div>
+            <div className="h-48">
+              <ProductsChart data={weeklyProductsData} />
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
@@ -94,7 +126,7 @@ export default async function DashboardPage() {
                 return (
                   <div className="flex items-center justify-between p-3 border border-[#ebebeb] rounded-md bg-neutral-50 hover:bg-neutral-100 hover:shadow-md transition-all" key={key}>
                     <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${bgColors[stockLevel]}`}/>
+                      <div className={`w-3 h-3 rounded-full ${bgColors[stockLevel]}`} />
                       <span className="text-sm outfit-regular text-neutral-900">{product.name}</span>
                     </div>
                     <div className={`text-sm outfit-regular ${textColors[stockLevel]}`}>
